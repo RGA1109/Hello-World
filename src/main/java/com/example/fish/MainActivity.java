@@ -3,13 +3,11 @@ package com.example.fish;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity
 {
-
     private PlayerMovementView gameView;
     private Handler handler = new Handler();
     private final static long Interval = 30;
