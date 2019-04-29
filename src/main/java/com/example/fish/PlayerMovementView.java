@@ -18,7 +18,7 @@ public class PlayerMovementView extends View {
     private Bitmap enemy[] = new Bitmap[2];
     private Bitmap gold[] = new Bitmap[2];
     private Bitmap life[] = new Bitmap[3];
-    private Bitmap player[] = new Bitmap[2];
+    private Bitmap player[] = new Bitmap[5];
     private Bitmap stick[] = new Bitmap[2];
     private Paint scorePaintStick = new Paint();
     private Paint scorePaintBrick = new Paint();
@@ -27,6 +27,9 @@ public class PlayerMovementView extends View {
     private int enemyX, enemyY, enemySpeed = 5;
     private int greenX, greenY, greenSpeed = 15;
     private int lifeCounterOfFish;
+    private int invulnerability;
+    private int doubleItemSpell = 10;
+    private int lifeRegain;
     private int playerSpeed;
     private int playerX, playerY;
     private int redX, redY, redSpeed = 15;
@@ -43,13 +46,18 @@ public class PlayerMovementView extends View {
         //Bitmap map images
         backgroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.background);
         brick[0] = BitmapFactory.decodeResource(getResources(), R.drawable.brick);
+        brick[1] = BitmapFactory.decodeResource(getResources(), R.drawable.brickx2);
         enemy[0] = BitmapFactory.decodeResource(getResources(), R.drawable.knife);
         gold[0] = BitmapFactory.decodeResource(getResources(), R.drawable.gold);
+        gold[1] = BitmapFactory.decodeResource(getResources(), R.drawable.goldx2);
         life[0] = BitmapFactory.decodeResource(getResources(), R.drawable.heart);
         life[1] = BitmapFactory.decodeResource(getResources(), R.drawable.broken);
         player[0] = BitmapFactory.decodeResource(getResources(), R.drawable.player1);
         player[1] = BitmapFactory.decodeResource(getResources(), R.drawable.player2);
+        player[2]= BitmapFactory.decodeResource(getResources(), R.drawable.invencibility);
+        player[3] = BitmapFactory.decodeResource(getResources(), R.drawable.powerupfront);
         stick[0] = BitmapFactory.decodeResource(getResources(), R.drawable.stick);
+        stick[1] = BitmapFactory.decodeResource(getResources(), R.drawable.stickx2);
 
         //Stick icon info
         scorePaintStick.setColor(Color.BLACK);
@@ -80,7 +88,6 @@ public class PlayerMovementView extends View {
     {
         int minPlayerX = player[0].getWidth();
         int maxPlayerX = canvasWidth - player[0].getWidth();
-
         super.onDraw(canvas);
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
@@ -116,7 +123,12 @@ public class PlayerMovementView extends View {
         yellowY = yellowY - yellowSpeed;
         if (hitBallChecker(yellowX, yellowY))
         {
-            scoreGold = scoreGold + 1;
+            if(scoreGold > 8) {
+                scoreGold = scoreGold + 3;
+            }
+            else{
+                scoreGold = scoreGold + 1;
+            }
             yellowY =- 100;
         }
 
@@ -125,16 +137,24 @@ public class PlayerMovementView extends View {
             yellowY = canvasHeight + 21;
             yellowX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
         }
-        canvas.drawBitmap(gold[0], yellowX, yellowY,null);
-
+        if (scoreGold == 0 || scoreGold == 1 || scoreGold == 2 || scoreGold == 3 || scoreGold == 4 ||
+                scoreGold == 5 || scoreGold == 6 || scoreGold == 7) {
+            canvas.drawBitmap(gold[0], yellowX, yellowY, null);
+        }
+        else
+            canvas.drawBitmap(gold[1], yellowX, yellowY,null);
 
         // Movement for the Brick item
         greenY = greenY - greenSpeed;
         if (hitBallChecker(greenX, greenY))
         {
-            scoreBrick = scoreBrick + 1;
-
-            greenY =- 100;
+            if(scoreBrick > 8) {
+                scoreBrick = scoreBrick + 3;
+            }
+            else {
+                scoreBrick = scoreBrick + 1;
+            }
+                greenY =- 100;
         }
 
         if (greenY < 0)
@@ -142,14 +162,23 @@ public class PlayerMovementView extends View {
             greenY = canvasHeight + 21;
             greenX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
         }
-        canvas.drawBitmap(brick[0], greenX, greenY, null);
-
+        if (scoreBrick == 0 || scoreBrick == 1 || scoreBrick == 2 || scoreBrick == 3 ||
+                scoreBrick == 4 || scoreBrick == 5 || scoreBrick == 6 || scoreBrick == 7) {
+            canvas.drawBitmap(brick[0], greenX, greenY, null);
+        }
+        else
+            canvas.drawBitmap(brick[1], greenX, greenY, null);
 
         //Movement for the Stick item
         redY = redY - redSpeed;
         if (hitBallChecker(redX, redY))
-        {
-            scoreStick = scoreStick + 1;
+        {   if(scoreStick > 8)
+            {
+                scoreStick = scoreStick + 3;
+            }
+            else {
+                scoreStick = scoreStick + 1;
+            }
             redX =- 100;
         }
 
@@ -158,8 +187,13 @@ public class PlayerMovementView extends View {
             redY = canvasHeight + 21;
             redX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
         }
-        canvas.drawBitmap(stick[0], redX, redY,null);
 
+        if (scoreStick == 0 || scoreStick == 1 || scoreStick == 2 || scoreStick == 3 || scoreStick == 4 ||
+                scoreStick == 5 || scoreStick == 6 || scoreStick == 7) {
+            canvas.drawBitmap(stick[0], redX, redY, null);
+        }
+        else
+            canvas.drawBitmap(stick[1], redX, redY,null);
 
         // enemy speed counter and checker for if an enemy icon is touched
         enemyY = enemyY - enemySpeed;
@@ -190,14 +224,21 @@ public class PlayerMovementView extends View {
         canvas.drawBitmap(enemy[0], enemyX, enemyY, null);
 
 
-        //Life hit box counter  keeps trake of hits and switching the life icons when damaged
+        //Life hit box counter  keeps track of hits and switching the life icons when damaged
         for (int i=0; i<3; i++)
         {
             int x = (int) (580 + life[0].getWidth() * 1.5 * i);
             int y = 30;
+            if (scoreGold == 5 && i > 0){
+                canvas.drawBitmap(life[1], x, y, null);
+                i--;
+                scoreGold -=5;
+                lifeCounterOfFish++;
+            }
 
             if (i < lifeCounterOfFish)
             {
+
                 canvas.drawBitmap(life[0], x, y, null);
             }
             else
@@ -217,7 +258,7 @@ public class PlayerMovementView extends View {
     //function check to see if the player has touched one of the items on the screen
     public boolean hitBallChecker(int x, int y)
     {
-        if (playerX < x && x < (playerX + player[0].getWidth()))
+        if (playerX < x && x < (playerX + player[0].getWidth()) && playerY < y && y < (playerY + player[0].getHeight()))
         {
             return true;
         }
