@@ -27,9 +27,7 @@ public class PlayerMovementView extends View {
     private int enemyX, enemyY, enemySpeed = 5;
     private int greenX, greenY, greenSpeed = 15;
     private int lifeCounterOfFish;
-    private int invulnerability;
-    private int doubleItemSpell = 10;
-    private int lifeRegain;
+    private int gameWinningCounter;
     private int playerSpeed;
     private int playerX, playerY;
     private int redX, redY, redSpeed = 15;
@@ -44,7 +42,7 @@ public class PlayerMovementView extends View {
         super(context);
 
         //Bitmap map images
-        backgroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.background);
+        backgroundImage = BitmapFactory.decodeResource(getResources(), R.drawable.backgroundnew);
         brick[0] = BitmapFactory.decodeResource(getResources(), R.drawable.brick);
         brick[1] = BitmapFactory.decodeResource(getResources(), R.drawable.brickx2);
         enemy[0] = BitmapFactory.decodeResource(getResources(), R.drawable.knife);
@@ -91,7 +89,7 @@ public class PlayerMovementView extends View {
         super.onDraw(canvas);
         canvasWidth = canvas.getWidth();
         canvasHeight = canvas.getHeight();
-        canvas.drawBitmap(backgroundImage, 0 , 0,  null);
+        canvas.drawBitmap(backgroundImage,0,0,null);
 
 
         // player movement in the x direction
@@ -136,6 +134,10 @@ public class PlayerMovementView extends View {
         {
             yellowY = canvasHeight + 21;
             yellowX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
+
+            if (scoreGold == 25){
+                gameWinningCounter++;
+            }
         }
         if (scoreGold == 0 || scoreGold == 1 || scoreGold == 2 || scoreGold == 3 || scoreGold == 4 ||
                 scoreGold == 5 || scoreGold == 6 || scoreGold == 7) {
@@ -161,6 +163,10 @@ public class PlayerMovementView extends View {
         {
             greenY = canvasHeight + 21;
             greenX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
+
+            if (scoreBrick == 25){
+                gameWinningCounter++;
+            }
         }
         if (scoreBrick == 0 || scoreBrick == 1 || scoreBrick == 2 || scoreBrick == 3 ||
                 scoreBrick == 4 || scoreBrick == 5 || scoreBrick == 6 || scoreBrick == 7) {
@@ -186,6 +192,10 @@ public class PlayerMovementView extends View {
         {
             redY = canvasHeight + 21;
             redX = (int) Math.floor(Math.random() * (maxPlayerX - minPlayerX)) + minPlayerX;
+
+            if (scoreStick == 25){
+                gameWinningCounter++;
+            }
         }
 
         if (scoreStick == 0 || scoreStick == 1 || scoreStick == 2 || scoreStick == 3 || scoreStick == 4 ||
@@ -199,12 +209,16 @@ public class PlayerMovementView extends View {
         enemyY = enemyY - enemySpeed;
         if(hitBallChecker(enemyX, enemyY))
         {
-            scoreStick = scoreStick - 1;
-            scoreGold = scoreGold - 1;
-            scoreBrick = scoreBrick - 1;
+            if (scoreStick != 0 && scoreBrick != 0 && scoreGold != 0) {
+                scoreStick = scoreStick - 1;
+                scoreGold = scoreGold - 1;
+                scoreBrick = scoreBrick - 1;
+            }
             enemyY =- 100;
             lifeCounterOfFish--;
 
+            // checks to see if the player has run out of lives, if so game end open the
+            // game over screen
             if (lifeCounterOfFish == 0)
             {
                 Toast.makeText(getContext(), "Game Over", Toast.LENGTH_SHORT).show();
@@ -214,6 +228,8 @@ public class PlayerMovementView extends View {
                 getContext().startActivity(gameOverIntent);
 
             }
+
+            // checks to see if the player has gathered the needed resorces to win the game
         }
 
         if (enemyY < 0)
@@ -227,9 +243,9 @@ public class PlayerMovementView extends View {
         //Life hit box counter  keeps track of hits and switching the life icons when damaged
         for (int i=0; i<3; i++)
         {
-            int x = (int) (580 + life[0].getWidth() * 1.5 * i);
+            int x = (int) (480 + life[0].getWidth() * 1.2 * i);
             int y = 30;
-            if (scoreGold == 5 && i > 0){
+            if (scoreGold == 5 && i < 0){
                 canvas.drawBitmap(life[1], x, y, null);
                 i--;
                 scoreGold -=5;
@@ -238,13 +254,21 @@ public class PlayerMovementView extends View {
 
             if (i < lifeCounterOfFish)
             {
-
                 canvas.drawBitmap(life[0], x, y, null);
             }
             else
             {
                 canvas.drawBitmap(life[1], x, y, null);
             }
+        }
+        if (gameWinningCounter == 3)
+        {
+            Toast.makeText(getContext(), "Winner", Toast.LENGTH_SHORT).show();
+
+            Intent gameWonIntent = new Intent(getContext(), GameWon.class);
+            gameWonIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            getContext().startActivity(gameWonIntent);
+
         }
 
 
@@ -264,7 +288,6 @@ public class PlayerMovementView extends View {
         }
         return false;
     }
-
 
     // current player movement function, listens for a click and move the player a set distance
     // for each click.
